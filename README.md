@@ -8,6 +8,8 @@
 
 <img src="https://github.com/AasherH/byovla.github.io/tree/main/img/anchor_figure.png" alt="drawing" width="100%"/>
 
+<img src="https://github.com/diffusion-ppo/diffusion-ppo.github.io/blob/main/img/overview-full.png" alt="drawing" width="100%"/>
+
 > We introduce Bring Your Own VLA (BYOVLA): a run-time intervention scheme for vision-language-action (VLA) models that improves baseline performance in the presence of distractor objects and backgrounds without finetuning or access to the model's weights.
 
 ## Installation
