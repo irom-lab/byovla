@@ -6,7 +6,7 @@
 
 <sup>1</sup>Princeton University
 
-<img src="https://github.com/AasherH/byovla.github.io/tree/main/img/anchor_figure.png" alt="drawing" width="100%"/>
+<img src="https://github.com/AasherH/byovla/blob/main/img/anchor_figure.png" alt="drawing" width="100%"/>
 
 <img src="https://github.com/diffusion-ppo/diffusion-ppo.github.io/blob/main/img/overview-full.png" alt="drawing" width="100%"/>
 
