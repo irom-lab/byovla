@@ -10,9 +10,9 @@
 
 > We introduce Bring Your Own VLA (BYOVLA): a run-time intervention scheme for vision-language-action (VLA) models that improves baseline performance in the presence of distractor objects and backgrounds without finetuning or access to the model's weights.
 
-## Getting Started
+## Getting Started and Usage
 
-For example, to utilize `BYOVLA` on [Octo-Base]([https://rail-berkeley.github.io/bridgedata/)](https://github.com/octo-models/octo) with a WidowX robot:
+For example, to utilize `BYOVLA` on [Octo-Base](https://github.com/octo-models/octo) with a WidowX robot:
 
 ```python
 sam2_checkpoint = "/Grounded-SAM-2/checkpoints/sam2_hiera_large.pt"
@@ -95,10 +95,15 @@ conda byovla create -f environment.yaml
 ```
 If you run into any problems during the installation process, please file a GitHub Issue and we will strive to address it soon. 
 
-## Usage
+## Notes
 `BYOVLA` is a run-time observation intervention scheme and may be used at every time-step for which there is a new observation. In our experiments, we used the RealSense D435 camera, but you may need to install additional dependencies for your specific camera. 
 The code provided is a skeleton and requires the user to change file paths, api keys, etc. 
 
-## Notes
+## License
+This repository is released under the MIT license. See [LICENSE](LICENSE).
 
-
+## Acknowledgement
+* [Octo, Octo Model Team](https://github.com/octo-models/octo): VLA model
+* [OpenVLA, Kim et al.](https://github.com/openvla/openvla): VLA model
+* [Grounded-SAM 2, Ren et al.](https://github.com/IDEA-Research/Grounded-SAM-2): code for grounded segmentation model
+* [Inpaint Anything, Yu et al.](https://github.com/geekyutao/Inpaint-Anything?tab=readme-ov-file): code for inpainting model
