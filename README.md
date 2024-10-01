@@ -12,7 +12,7 @@
 
 ## Getting Started and Usage
 
-For example, to utilize `BYOVLA` on [Octo-Base](https://github.com/octo-models/octo) with a WidowX robot:
+For example, to utilize `BYOVLA` on [Octo-Base](https://github.com/octo-models/octo) with a WidowX robot in an environment from the [BridgeV2 Dataset](https://github.com/rail-berkeley/bridge_data_v2):
 
 ```python
 sam2_checkpoint = "/Grounded-SAM-2/checkpoints/sam2_hiera_large.pt"
