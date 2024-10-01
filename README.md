@@ -12,37 +12,66 @@
 
 ## Getting Started
 
-For example, to load `openvla-7b` for zero-shot instruction following in the
-[BridgeData V2 environments](https://rail-berkeley.github.io/bridgedata/) with a WidowX robot:
+For example, to utilize `BYOVLA` on Octo-Base
+[Octo]([https://rail-berkeley.github.io/bridgedata/)](https://github.com/octo-models/octo) with a WidowX robot:
 
 ```python
-# Install minimal dependencies (`torch`, `transformers`, `timm`, `tokenizers`, ...)
-# > pip install -r https://raw.githubusercontent.com/openvla/openvla/main/requirements-min.txt
-from transformers import AutoModelForVision2Seq, AutoProcessor
-from PIL import Image
+sam2_checkpoint = "/Grounded-SAM-2/checkpoints/sam2_hiera_large.pt"
+sam2model = build_sam2("sam2_hiera_l.yaml", sam2_checkpoint, device='cuda')
+sam2_predictor = SAM2ImagePredictor(sam2_model)
 
-import torch
+# build grounding dino from huggingface
+model_id = "IDEA-Research/grounding-dino-tiny"
+processor = AutoProcessor.from_pretrained(model_id)
+grounding_model = AutoModelForZeroShotObjectDetection.from_pretrained(model_id).to(
+    device
+)
 
-# Load Processor & VLA
-processor = AutoProcessor.from_pretrained("openvla/openvla-7b", trust_remote_code=True)
-vla = AutoModelForVision2Seq.from_pretrained(
-    "openvla/openvla-7b", 
-    attn_implementation="flash_attention_2",  # [Optional] Requires `flash_attn`
-    torch_dtype=torch.bfloat16, 
-    low_cpu_mem_usage=True, 
-    trust_remote_code=True
-).to("cuda:0")
+lama_model = "Path to /Inpaint_Anything/pretrained_models/big-lama"
+lama_config = (
+    "Path to /Inpaint_Anything/lama/configs/prediction/default.yaml"
+)
 
-# Grab image input & format prompt
-image: Image.Image = get_from_camera(...)
-prompt = "In: What action should the robot take to {<INSTRUCTION>}?\nOut:"
+# create widowx instance
+bot = InterbotixManipulatorXS("wx250s", "arm", "gripper")
 
-# Predict Action (7-DoF; un-normalize for BridgeData V2)
-inputs = processor(prompt, image).to("cuda:0", dtype=torch.bfloat16)
-action = vla.predict_action(**inputs, unnorm_key="bridge_orig", do_sample=False)
+# load VLA
+language_instruction = "place the carrot on plate"
+model = OctoModel.load_pretrained("hf://rail-berkeley/octo-base")
+task = model.create_tasks(texts=[language_instruction])
 
-# Execute...
-robot.act(action, ...)
+# initial observation
+img = take_picture()
+
+# Step 1: call VLM
+vlm_output = gpt4o(img, language_instruction)
+not_relevant_objects_list = vlm_refine_output(vlm_output)
+
+# call segmentation model on objects
+gs2_object_input = grounded_sam2_text(not_relevant_objects_list)
+detections_objects, class_names_objects = grounded_sam2(img, gs2_object_input)
+
+# Step 2: compute vla sensitivities
+sensitivities = object_sensitivities(img, class_names_objects, detections_objects,model, language_instruction)
+
+# Step 3: transform image
+img = inpaint_objects(class_names_objects,detections_objects,sensitivity_object,img)
+
+# call vla on transformed image
+observation = {
+    "image_primary": img,
+    "timestep_pad_mask": np.array([[True]])}
+task = model.create_tasks(texts=[language_instruction])
+
+actions = model.sample_actions(
+            observation,
+            task,
+            unnormalization_statistics=model.dataset_statistics["bridge_dataset"][
+                "action"],
+            rng=jax.random.PRNGKey(0))
+
+# execute action
+bot.act(action, ...)
 ```
 
 
