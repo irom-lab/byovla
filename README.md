@@ -1,6 +1,6 @@
 # Bring Your Own VLA
 
-[[Paper]](https://aasherh.github.io/data/Hancock_Visually_Robust_VLAs.pdf)   [[Website]](https://aasherh.github.io/byovla.github.io/)
+[[Paper]](https://aasherh.github.io/data/Hancock_Visually_Robust_VLAs.pdf)   [[Website]](https://aasherh.github.io/byovla/)
 
 [Asher J. Hancock<sup>1</sup>](https://aasherh.github.io/), [Allen Z. Ren<sup>1</sup>](https://allenzren.github.io/), [Anirudha Majumdar<sup>1</sup>](https://irom-lab.princeton.edu/majumdar/)
 
