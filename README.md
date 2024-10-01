@@ -12,8 +12,7 @@
 
 ## Getting Started
 
-For example, to utilize `BYOVLA` on Octo-Base
-[Octo]([https://rail-berkeley.github.io/bridgedata/)](https://github.com/octo-models/octo) with a WidowX robot:
+For example, to utilize `BYOVLA` on [Octo-Base]([https://rail-berkeley.github.io/bridgedata/)](https://github.com/octo-models/octo) with a WidowX robot:
 
 ```python
 sam2_checkpoint = "/Grounded-SAM-2/checkpoints/sam2_hiera_large.pt"
@@ -73,5 +72,29 @@ actions = model.sample_actions(
 # execute action
 bot.act(action, ...)
 ```
+## Installation
+Use the setup commands below to get started. The exact foundation models used are user-dependent, but we provide instructions for the ones utilized in this work. 
+
+```python
+
+# Clone and install byovla repository
+git clone https://github.com/irom-lab/byovla.git
+cd byovla
+
+# clone Grounded-SAM2
+git clone https://github.com/IDEA-Research/Grounded-SAM-2.git
+
+# clone Inpaint-Anything
+git clone https://github.com/geekyutao/Inpaint-Anything.git
+
+# clone VLA - we use Octo, for example
+git clone https://github.com/octo-models/octo.git
+
+# Create conda environment and install environment.yaml file
+conda byovla create -f environment.yaml
+```
+If you run into any problems during the installation process, please file a GitHub Issue and we will strive to address it soon. 
+
+## Notes
 
 
