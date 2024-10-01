@@ -95,6 +95,10 @@ conda byovla create -f environment.yaml
 ```
 If you run into any problems during the installation process, please file a GitHub Issue and we will strive to address it soon. 
 
+## Usage
+`BYOVLA` is a run-time observation intervention scheme and may be used at every time-step for which there is a new observation. In our experiments, we used the RealSense D435 camera, but you may need to install additional dependencies for your specific camera. 
+The code provided is a skeleton and requires the user to change file paths, api keys, etc. 
+
 ## Notes
 
 
