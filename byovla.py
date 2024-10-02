@@ -1,19 +1,16 @@
-"""
-Runs perturbation analysis at beginning by averaging octo output of N samples
-Then outpaints forever after that
-"""
+import sys
 
 # Imports
 from PIL import Image, ImageFilter
 import time
 
-import sys
 
 # GPT4-o
 from openai import OpenAI
 import base64
 import requests
 import json
+
 
 # Grounded SAM2
 import cv2
@@ -34,6 +31,7 @@ from matplotlib import pyplot as plt
 
 from lama_inpaint import inpaint_img_with_lama
 from utils import dilate_mask
+
 
 # WidowX
 from interbotix_xs_modules.arm import InterbotixManipulatorXS
@@ -1219,15 +1217,16 @@ def inpaint_backgrounds(
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-sys.path.insert(1, "Path to /Inpaint_Anything")
-sys.path.insert(1, "Path to /Inpaint_Anything/segment_anything")
-sys.path.insert(1, "Path to /Grounded-SAM-2/")
-sys.path.insert(1, "Path to /Grounded-SAM-2/utils_groundedSAM2") # Change to avoid double utils
-sys.path.insert(1, "Path to /Grounded-SAM-2/sam2")
+
+sys.path.insert(1, "your_absolute_path_to/Inpaint_Anything")
+sys.path.insert(1, "your_absolute_path_to/Inpaint_Anything/segment_anything")
+sys.path.insert(1, "your_absolute_path_to/Grounded-SAM-2/")
+sys.path.insert(1, "your_absolute_path_to/Grounded-SAM-2/utils_groundedSAM2") # Change to avoid double utils
+sys.path.insert(1, "your_absolute_path_to/Grounded-SAM-2/sam2")
 
 
 # grounded SAM2
-sam2_checkpoint = "Path to /Grounded-SAM-2/checkpoints/sam2_hiera_large.pt"
+sam2_checkpoint = "your_absolute_path_to/Grounded-SAM-2/checkpoints/sam2_hiera_large.pt"
 model_cfg = "sam2_hiera_l.yaml"
 sam2_model = build_sam2(model_cfg, sam2_checkpoint, device=device)
 sam2_predictor = SAM2ImagePredictor(sam2_model)
