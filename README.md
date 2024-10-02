@@ -91,7 +91,7 @@ git clone https://github.com/geekyutao/Inpaint-Anything.git
 git clone https://github.com/octo-models/octo.git
 
 # Create conda environment and install environment.yaml file
-conda byovla create -f environment.yaml
+conda env create -f environment.yml
 ```
 
 This code is meant to be run on the WidowX robot and will not work without first following the instructions [here](https://docs.trossenrobotics.com/interbotix_xsarms_docs/getting_started.html). 
