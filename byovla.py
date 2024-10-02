@@ -681,164 +681,164 @@ def object_sensitivities(
     N,
     language_instruction,
 ):
-	"""
-	Determines objects in image that the VLA is sensitive to
-	"""
-    num_objects = len(class_names_sensitivity)
-    sensitivity = np.full((1, num_objects), True, dtype=bool)
+        """
+        Determines objects in image that the VLA is sensitive to
+        """
+        num_objects = len(class_names_sensitivity)
+        sensitivity = np.full((1, num_objects), True, dtype=bool)
 
-    nonperturb_actions_octo = []  # holds all N samples
-    peturb_actions_octo_all = (
-        []
-    )  # holds all N samples for k num_objects [K, N, n_steps, 7]
+        nonperturb_actions_octo = []  # holds all N samples
+        peturb_actions_octo_all = (
+            []
+        )  # holds all N samples for k num_objects [K, N, n_steps, 7]
 
-    delta_data = {}  # holds all deltas for k num_objects
+        delta_data = {}  # holds all deltas for k num_objects
 
-    start_sensitivity = time.time()
-    nonperturb_img = original_img.copy()
-    nonperturb_img = warm_filter(nonperturb_img)
-    nonperturb_img = cv2.resize(nonperturb_img, (256, 256))
-    nonperturb_img = nonperturb_img[np.newaxis, np.newaxis, ...]
-    nonperturb_img_curr = nonperturb_img.copy()
-
-    texts = []
-    timestep_pad_mask = []
-    for n in range(N):
-        if n == 0:
-            nonperturb_img_curr = nonperturb_img_curr
-            texts.append(language_instruction)
-            timestep_pad_mask.append([True])
-        else:
-            nonperturb_img_curr = np.vstack([nonperturb_img_curr, nonperturb_img])
-            texts.append(language_instruction)
-            timestep_pad_mask.append([True])
-
-    nonperturb_observation = {
-        "image_primary": nonperturb_img_curr,
-        "timestep_pad_mask": np.array(timestep_pad_mask),
-    }
-
-    task = model.create_tasks(texts=texts)
-
-    nonperturb_actions_octo = model.sample_actions(
-        nonperturb_observation,
-        task,
-        unnormalization_statistics=model.dataset_statistics["bridge_dataset"]["action"],
-        rng=jax.random.PRNGKey(0),
-    )
-    # Turn into array
-    nonperturb_actions_octo = np.array(nonperturb_actions_octo)  # [N, n_steps, 7]
-
-    # Determine which objects octo is sensitve to
-    perturb_images = []
-    perturb_actions_all_items_curr = []
-    for i in range(num_objects):
-        mask = get_mask(
-            class_names_sensitivity[i],
-            class_names_sensitivity,
-            detections_sensitivity,
-        )
-        dilate_size = 0
-        mask_dilate = dilate_mask(mask, dilate_size)
+        start_sensitivity = time.time()
+        nonperturb_img = original_img.copy()
+        nonperturb_img = warm_filter(nonperturb_img)
+        nonperturb_img = cv2.resize(nonperturb_img, (256, 256))
+        nonperturb_img = nonperturb_img[np.newaxis, np.newaxis, ...]
+        nonperturb_img_curr = nonperturb_img.copy()
 
         texts = []
         timestep_pad_mask = []
         for n in range(N):
             if n == 0:
-                random_kernel_size = np.random.randint(15, 30)
-
-                # Perturb
-                perturb_img_curr = perturb_gaussian_blur(
-                    original_img, mask_dilate, kernel_size=random_kernel_size
-                )
-      
-                perturb_img_curr = warm_filter(perturb_img_curr)
-
-                # Save Image for Analysis
-                perturb_images.append(perturb_img_curr)
-                
-
-                perturb_img_curr = cv2.resize(perturb_img_curr, (256, 256))
-                perturb_img_curr = perturb_img_curr[np.newaxis, np.newaxis, ...]
+                nonperturb_img_curr = nonperturb_img_curr
                 texts.append(language_instruction)
                 timestep_pad_mask.append([True])
             else:
-                random_kernel_size = np.random.randint(15, 30)
-
-                # Perturb
-                perturb_img = perturb_gaussian_blur(
-                    original_img, mask_dilate, kernel_size=random_kernel_size
-                )
-                # perturb_img = perturb_gaussian_noise(original_img, mask_dilate)
-                perturb_img = warm_filter(perturb_img)
-
-                # Save Image for Analysis
-                perturb_images.append(perturb_img)
-               
-
-                perturb_img = cv2.resize(perturb_img, (256, 256))
-                perturb_img = perturb_img[np.newaxis, np.newaxis, ...]
-
-                perturb_img_curr = np.vstack([perturb_img_curr, perturb_img])
+                nonperturb_img_curr = np.vstack([nonperturb_img_curr, nonperturb_img])
                 texts.append(language_instruction)
                 timestep_pad_mask.append([True])
 
-        perturb_observation = {
-            "image_primary": perturb_img_curr,
+        nonperturb_observation = {
+            "image_primary": nonperturb_img_curr,
             "timestep_pad_mask": np.array(timestep_pad_mask),
         }
+
         task = model.create_tasks(texts=texts)
 
-        perturb_actions_octo_curr = []  # holds all N samples for current object
-        perturb_actions_octo_curr = model.sample_actions(
-            perturb_observation,
+        nonperturb_actions_octo = model.sample_actions(
+            nonperturb_observation,
             task,
-            unnormalization_statistics=model.dataset_statistics["bridge_dataset"][
-                "action"
-            ],
+            unnormalization_statistics=model.dataset_statistics["bridge_dataset"]["action"],
             rng=jax.random.PRNGKey(0),
         )
+        # Turn into array
+        nonperturb_actions_octo = np.array(nonperturb_actions_octo)  # [N, n_steps, 7]
 
-        perturb_actions_octo_curr = np.array(
-            perturb_actions_octo_curr
-        )  # [N, n_steps, 7]
-        peturb_actions_octo_all.append(
-            perturb_actions_octo_curr
-        )  # Save for post-processing
+        # Determine which objects octo is sensitve to
+        perturb_images = []
+        perturb_actions_all_items_curr = []
+        for i in range(num_objects):
+            mask = get_mask(
+                class_names_sensitivity[i],
+                class_names_sensitivity,
+                detections_sensitivity,
+            )
+            dilate_size = 0
+            mask_dilate = dilate_mask(mask, dilate_size)
 
-        # Compute Delta
-        delta = (
-            nonperturb_actions_octo - perturb_actions_octo_curr
-        )  # [num_samples, n_steps, 7]
-        # Scale by w and square
-        delta_sq = np.square(delta)  # [num_samples, n_steps, 7]
-        delta_wsq = np.multiply(delta_sq, w)  # [num_samples, n_steps, 7]
-        # Compute Magnitude
-        delta_sum_wsq = np.sum(delta_wsq, axis=2)  # [num_samples, n_steps]
-        delta_sqrt_sum_wsq = np.sqrt(delta_sum_wsq)  # [num_samples, n_steps]
-        # Average over samples
-        delta_avg_samples = np.mean(delta_sqrt_sum_wsq, axis=0)  # [n_steps]
-        delta_final = np.mean(delta_avg_samples)  # scalar
-        # print(f"Delta for {class_names[i]}: {delta_final}")
-        delta_data_curr = {
-            "object": class_names_sensitivity[i],
-            "delta": delta,
-            "delta_sq": delta_sq,
-            "delta_wsq": delta_wsq,
-            "delta_sum_wsq": delta_sum_wsq,
-            "delta_sqrt_sum_wsq": delta_sqrt_sum_wsq,
-            "delta_avg_samples": delta_avg_samples,
-            "delta_final": delta_final,
-        }
-        delta_data[i] = delta_data_curr
+            texts = []
+            timestep_pad_mask = []
+            for n in range(N):
+                if n == 0:
+                    random_kernel_size = np.random.randint(15, 30)
 
-        # Check Sensitivity
-        if delta_final >= thresh:
-            sensitivity[0, i] = True
-        else:
-            sensitivity[0, i] = False
+                    # Perturb
+                    perturb_img_curr = perturb_gaussian_blur(
+                        original_img, mask_dilate, kernel_size=random_kernel_size
+                    )
+        
+                    perturb_img_curr = warm_filter(perturb_img_curr)
 
-    return sensitivity, delta_data
+                    # Save Image for Analysis
+                    perturb_images.append(perturb_img_curr)
+                    
+
+                    perturb_img_curr = cv2.resize(perturb_img_curr, (256, 256))
+                    perturb_img_curr = perturb_img_curr[np.newaxis, np.newaxis, ...]
+                    texts.append(language_instruction)
+                    timestep_pad_mask.append([True])
+                else:
+                    random_kernel_size = np.random.randint(15, 30)
+
+                    # Perturb
+                    perturb_img = perturb_gaussian_blur(
+                        original_img, mask_dilate, kernel_size=random_kernel_size
+                    )
+                    # perturb_img = perturb_gaussian_noise(original_img, mask_dilate)
+                    perturb_img = warm_filter(perturb_img)
+
+                    # Save Image for Analysis
+                    perturb_images.append(perturb_img)
+                
+
+                    perturb_img = cv2.resize(perturb_img, (256, 256))
+                    perturb_img = perturb_img[np.newaxis, np.newaxis, ...]
+
+                    perturb_img_curr = np.vstack([perturb_img_curr, perturb_img])
+                    texts.append(language_instruction)
+                    timestep_pad_mask.append([True])
+
+            perturb_observation = {
+                "image_primary": perturb_img_curr,
+                "timestep_pad_mask": np.array(timestep_pad_mask),
+            }
+            task = model.create_tasks(texts=texts)
+
+            perturb_actions_octo_curr = []  # holds all N samples for current object
+            perturb_actions_octo_curr = model.sample_actions(
+                perturb_observation,
+                task,
+                unnormalization_statistics=model.dataset_statistics["bridge_dataset"][
+                    "action"
+                ],
+                rng=jax.random.PRNGKey(0),
+            )
+
+            perturb_actions_octo_curr = np.array(
+                perturb_actions_octo_curr
+            )  # [N, n_steps, 7]
+            peturb_actions_octo_all.append(
+                perturb_actions_octo_curr
+            )  # Save for post-processing
+
+            # Compute Delta
+            delta = (
+                nonperturb_actions_octo - perturb_actions_octo_curr
+            )  # [num_samples, n_steps, 7]
+            # Scale by w and square
+            delta_sq = np.square(delta)  # [num_samples, n_steps, 7]
+            delta_wsq = np.multiply(delta_sq, w)  # [num_samples, n_steps, 7]
+            # Compute Magnitude
+            delta_sum_wsq = np.sum(delta_wsq, axis=2)  # [num_samples, n_steps]
+            delta_sqrt_sum_wsq = np.sqrt(delta_sum_wsq)  # [num_samples, n_steps]
+            # Average over samples
+            delta_avg_samples = np.mean(delta_sqrt_sum_wsq, axis=0)  # [n_steps]
+            delta_final = np.mean(delta_avg_samples)  # scalar
+            # print(f"Delta for {class_names[i]}: {delta_final}")
+            delta_data_curr = {
+                "object": class_names_sensitivity[i],
+                "delta": delta,
+                "delta_sq": delta_sq,
+                "delta_wsq": delta_wsq,
+                "delta_sum_wsq": delta_sum_wsq,
+                "delta_sqrt_sum_wsq": delta_sqrt_sum_wsq,
+                "delta_avg_samples": delta_avg_samples,
+                "delta_final": delta_final,
+            }
+            delta_data[i] = delta_data_curr
+
+            # Check Sensitivity
+            if delta_final >= thresh:
+                sensitivity[0, i] = True
+            else:
+                sensitivity[0, i] = False
+
+        return sensitivity, delta_data
 
 
 def background_sensitivities(
@@ -852,166 +852,166 @@ def background_sensitivities(
     perturb_std,
     save_gs2_directory,
 ):
-	"""
-	Determines sensitivity of VLA to background regions
-	"""
-    num_objects = len(class_names_sensitivity)
-    sensitivity = np.full((1, num_objects), True, dtype=bool)
+        """
+        Determines sensitivity of VLA to background regions
+        """
+        num_objects = len(class_names_sensitivity)
+        sensitivity = np.full((1, num_objects), True, dtype=bool)
 
-    nonperturb_actions_octo = []  # holds all N samples
-    peturb_actions_octo_all = (
-        []
-    )  
+        nonperturb_actions_octo = []  # holds all N samples
+        peturb_actions_octo_all = (
+            []
+        )  
 
-    delta_data = {}  # holds all deltas for k num_objects
+        delta_data = {}  # holds all deltas for k num_objects
 
-    start_sensitivity = time.time()
-    nonperturb_img = original_img.copy()
-    nonperturb_img = warm_filter(nonperturb_img)
-    nonperturb_img = cv2.resize(nonperturb_img, (256, 256))
-    nonperturb_img = nonperturb_img[np.newaxis, np.newaxis, ...]
-    nonperturb_img_curr = nonperturb_img.copy()
-
-    texts = []
-    timestep_pad_mask = []
-    for n in range(N):
-        if n == 0:
-            nonperturb_img_curr = nonperturb_img_curr
-            texts.append(language_instruction)
-            timestep_pad_mask.append([True])
-        else:
-            nonperturb_img_curr = np.vstack([nonperturb_img_curr, nonperturb_img])
-            texts.append(language_instruction)
-            timestep_pad_mask.append([True])
-
-    nonperturb_observation = {
-        "image_primary": nonperturb_img_curr,
-        "timestep_pad_mask": np.array(timestep_pad_mask),
-    }
-
-    task = model.create_tasks(texts=texts)
-
-    nonperturb_actions_octo = model.sample_actions(
-        nonperturb_observation,
-        task,
-        unnormalization_statistics=model.dataset_statistics["bridge_dataset"]["action"],
-        rng=jax.random.PRNGKey(0),
-    )
-    # Turn into array
-    nonperturb_actions_octo = np.array(nonperturb_actions_octo)  # [N, n_steps, 7]
-    # nonperturb_actions_octo_all[step] = nonperturb_actions_octo
-
-    # Determine which objects octo is sensitve to
-    perturb_images = []
-    perturb_actions_all_items_curr = []
-    for i in range(num_objects):
-        mask = get_mask(
-            class_names_sensitivity[i],
-            class_names_sensitivity,
-            detections_sensitivity,
-        )
-        dilate_size = 0
-        mask_dilate = dilate_mask(mask, dilate_size)
+        start_sensitivity = time.time()
+        nonperturb_img = original_img.copy()
+        nonperturb_img = warm_filter(nonperturb_img)
+        nonperturb_img = cv2.resize(nonperturb_img, (256, 256))
+        nonperturb_img = nonperturb_img[np.newaxis, np.newaxis, ...]
+        nonperturb_img_curr = nonperturb_img.copy()
 
         texts = []
         timestep_pad_mask = []
         for n in range(N):
             if n == 0:
-
-                # Perturb
-                perturb_img = perturb_gaussian_noise(
-                    original_img, mask_dilate, std=perturb_std
-                )
-                # perturb_img = perturb_gaussian_noise(original_img, mask_dilate)
-                perturb_img_curr = warm_filter(perturb_img)
-
-                # Save Image for Analysis
-                perturb_images.append(perturb_img_curr)
-
-                perturb_img_curr = cv2.resize(perturb_img_curr, (256, 256))
-                perturb_img_curr = perturb_img_curr[np.newaxis, np.newaxis, ...]
+                nonperturb_img_curr = nonperturb_img_curr
                 texts.append(language_instruction)
                 timestep_pad_mask.append([True])
             else:
-                random_kernel_size = np.random.randint(15, 30)
-
-                # Perturb
-                perturb_img = perturb_gaussian_noise(
-                    original_img, mask_dilate, std=perturb_std
-                )
-                # perturb_img = perturb_gaussian_noise(original_img, mask_dilate)
-                perturb_img = warm_filter(perturb_img)
-
-                # Save Image for Analysis
-                perturb_images.append(perturb_img)
-                
-                perturb_img = cv2.resize(perturb_img, (256, 256))
-                perturb_img = perturb_img[np.newaxis, np.newaxis, ...]
-
-                perturb_img_curr = np.vstack([perturb_img_curr, perturb_img])
+                nonperturb_img_curr = np.vstack([nonperturb_img_curr, nonperturb_img])
                 texts.append(language_instruction)
                 timestep_pad_mask.append([True])
 
-        perturb_observation = {
-            "image_primary": perturb_img_curr,
+        nonperturb_observation = {
+            "image_primary": nonperturb_img_curr,
             "timestep_pad_mask": np.array(timestep_pad_mask),
         }
+
         task = model.create_tasks(texts=texts)
 
-        perturb_actions_octo_curr = []  # holds all N samples for current object
-        perturb_actions_octo_curr = model.sample_actions(
-            perturb_observation,
+        nonperturb_actions_octo = model.sample_actions(
+            nonperturb_observation,
             task,
-            unnormalization_statistics=model.dataset_statistics["bridge_dataset"][
-                "action"
-            ],
+            unnormalization_statistics=model.dataset_statistics["bridge_dataset"]["action"],
             rng=jax.random.PRNGKey(0),
         )
+        # Turn into array
+        nonperturb_actions_octo = np.array(nonperturb_actions_octo)  # [N, n_steps, 7]
+        # nonperturb_actions_octo_all[step] = nonperturb_actions_octo
 
-        perturb_actions_octo_curr = np.array(
-            perturb_actions_octo_curr
-        )  # [N, n_steps, 7]
-        peturb_actions_octo_all.append(
-            perturb_actions_octo_curr
-        )  # Save for post-processing
+        # Determine which objects octo is sensitve to
+        perturb_images = []
+        perturb_actions_all_items_curr = []
+        for i in range(num_objects):
+            mask = get_mask(
+                class_names_sensitivity[i],
+                class_names_sensitivity,
+                detections_sensitivity,
+            )
+            dilate_size = 0
+            mask_dilate = dilate_mask(mask, dilate_size)
 
-        # Compute Delta
-        delta = (
-            nonperturb_actions_octo - perturb_actions_octo_curr
-        )  # [num_samples, n_steps, 7]
-        # Scale by w and square
-        delta_sq = np.square(delta)  # [num_samples, n_steps, 7]
-        delta_wsq = np.multiply(delta_sq, w)  # [num_samples, n_steps, 7]
-        # Compute Magnitude
-        delta_sum_wsq = np.sum(delta_wsq, axis=2)  # [num_samples, n_steps]
-        delta_sqrt_sum_wsq = np.sqrt(delta_sum_wsq)  # [num_samples, n_steps]
-        # Average over samples
-        delta_avg_samples = np.mean(delta_sqrt_sum_wsq, axis=0)  # [n_steps]
-        delta_final = np.mean(delta_avg_samples)  # scalar
-        # print(f"Delta for {class_names[i]}: {delta_final}")
-        delta_data_curr = {
-            "object": class_names_sensitivity[i],
-            "delta": delta,
-            "delta_sq": delta_sq,
-            "delta_wsq": delta_wsq,
-            "delta_sum_wsq": delta_sum_wsq,
-            "delta_sqrt_sum_wsq": delta_sqrt_sum_wsq,
-            "delta_avg_samples": delta_avg_samples,
-            "delta_final": delta_final,
-        }
-        delta_data[i] = delta_data_curr
+            texts = []
+            timestep_pad_mask = []
+            for n in range(N):
+                if n == 0:
 
-        # Check Sensitivity
-        if delta_final >= thresh:
-            sensitivity[0, i] = True
-        else:
-            sensitivity[0, i] = False
+                    # Perturb
+                    perturb_img = perturb_gaussian_noise(
+                        original_img, mask_dilate, std=perturb_std
+                    )
+                    # perturb_img = perturb_gaussian_noise(original_img, mask_dilate)
+                    perturb_img_curr = warm_filter(perturb_img)
 
-        print(
-            f"Delta for {class_names_sensitivity[i]}: {delta_final}. Inpaint: {sensitivity[0, i]}"
-        )
-        print("")
-    return sensitivity, delta_data
+                    # Save Image for Analysis
+                    perturb_images.append(perturb_img_curr)
+
+                    perturb_img_curr = cv2.resize(perturb_img_curr, (256, 256))
+                    perturb_img_curr = perturb_img_curr[np.newaxis, np.newaxis, ...]
+                    texts.append(language_instruction)
+                    timestep_pad_mask.append([True])
+                else:
+                    random_kernel_size = np.random.randint(15, 30)
+
+                    # Perturb
+                    perturb_img = perturb_gaussian_noise(
+                        original_img, mask_dilate, std=perturb_std
+                    )
+                    # perturb_img = perturb_gaussian_noise(original_img, mask_dilate)
+                    perturb_img = warm_filter(perturb_img)
+
+                    # Save Image for Analysis
+                    perturb_images.append(perturb_img)
+                    
+                    perturb_img = cv2.resize(perturb_img, (256, 256))
+                    perturb_img = perturb_img[np.newaxis, np.newaxis, ...]
+
+                    perturb_img_curr = np.vstack([perturb_img_curr, perturb_img])
+                    texts.append(language_instruction)
+                    timestep_pad_mask.append([True])
+
+            perturb_observation = {
+                "image_primary": perturb_img_curr,
+                "timestep_pad_mask": np.array(timestep_pad_mask),
+            }
+            task = model.create_tasks(texts=texts)
+
+            perturb_actions_octo_curr = []  # holds all N samples for current object
+            perturb_actions_octo_curr = model.sample_actions(
+                perturb_observation,
+                task,
+                unnormalization_statistics=model.dataset_statistics["bridge_dataset"][
+                    "action"
+                ],
+                rng=jax.random.PRNGKey(0),
+            )
+
+            perturb_actions_octo_curr = np.array(
+                perturb_actions_octo_curr
+            )  # [N, n_steps, 7]
+            peturb_actions_octo_all.append(
+                perturb_actions_octo_curr
+            )  # Save for post-processing
+
+            # Compute Delta
+            delta = (
+                nonperturb_actions_octo - perturb_actions_octo_curr
+            )  # [num_samples, n_steps, 7]
+            # Scale by w and square
+            delta_sq = np.square(delta)  # [num_samples, n_steps, 7]
+            delta_wsq = np.multiply(delta_sq, w)  # [num_samples, n_steps, 7]
+            # Compute Magnitude
+            delta_sum_wsq = np.sum(delta_wsq, axis=2)  # [num_samples, n_steps]
+            delta_sqrt_sum_wsq = np.sqrt(delta_sum_wsq)  # [num_samples, n_steps]
+            # Average over samples
+            delta_avg_samples = np.mean(delta_sqrt_sum_wsq, axis=0)  # [n_steps]
+            delta_final = np.mean(delta_avg_samples)  # scalar
+            # print(f"Delta for {class_names[i]}: {delta_final}")
+            delta_data_curr = {
+                "object": class_names_sensitivity[i],
+                "delta": delta,
+                "delta_sq": delta_sq,
+                "delta_wsq": delta_wsq,
+                "delta_sum_wsq": delta_sum_wsq,
+                "delta_sqrt_sum_wsq": delta_sqrt_sum_wsq,
+                "delta_avg_samples": delta_avg_samples,
+                "delta_final": delta_final,
+            }
+            delta_data[i] = delta_data_curr
+
+            # Check Sensitivity
+            if delta_final >= thresh:
+                sensitivity[0, i] = True
+            else:
+                sensitivity[0, i] = False
+
+            print(
+                f"Delta for {class_names_sensitivity[i]}: {delta_final}. Inpaint: {sensitivity[0, i]}"
+            )
+            print("")
+        return sensitivity, delta_data
 
 
 def inpaint_objects(
