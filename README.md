@@ -93,7 +93,9 @@ git clone https://github.com/octo-models/octo.git
 # Create conda environment and install environment.yaml file
 conda byovla create -f environment.yaml
 ```
-If you run into any problems during the installation process, please file a GitHub Issue and we will strive to address it soon. 
+Follow the instructions for downloading [Grounded-SAM 2](https://github.com/IDEA-Research/Grounded-SAM-2). Then, follow the instructions for installing [Inpaint-Anything](https://github.com/geekyutao/Inpaint-Anything), paying special attention to `sam` and `lama` checkpoints. 
+
+If you run into any problems during the installation process, please file a GitHub Issue and we will strive to address it soon.
 
 ## Notes
 `BYOVLA` is a run-time observation intervention scheme and may be used at every time-step for which there is a new observation. In our experiments, we used the RealSense D435 camera, but you may need to install additional dependencies for your specific camera. 
