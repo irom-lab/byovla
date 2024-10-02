@@ -93,9 +93,13 @@ git clone https://github.com/octo-models/octo.git
 # Create conda environment and install environment.yaml file
 conda byovla create -f environment.yaml
 ```
-Follow the instructions for downloading [Grounded-SAM 2](https://github.com/IDEA-Research/Grounded-SAM-2). Then, follow the instructions for installing [Inpaint-Anything](https://github.com/geekyutao/Inpaint-Anything), paying special attention to `sam` and `lama` checkpoints. 
 
-If you run into any problems during the installation process, please file a GitHub Issue and we will strive to address it soon.
+This code is meant to be run on the WidowX robot and will not work without first following the instructions [here](https://docs.trossenrobotics.com/interbotix_xsarms_docs/getting_started.html). 
+
+
+Follow the instructions for downloading [Grounded-SAM 2](https://github.com/IDEA-Research/Grounded-SAM-2). Then, follow the instructions for installing [Inpaint-Anything](https://github.com/geekyutao/Inpaint-Anything), paying special attention to `sam` and `lama` checkpoints. Change `./Grounded-SAM-2/utils/` to `./Grounded-SAM-2/utils_groundedSAM2/` to avoid import errors, as different packages both used the name `utils`. Change any other paths needed in your environment. 
+
+If you run into any problems during the installation process, please file a GitHub Issue and we will strive to address it soon. 
 
 ## Notes
 `BYOVLA` is a run-time observation intervention scheme and may be used at every time-step for which there is a new observation. In our experiments, we used the RealSense D435 camera, but you may need to install additional dependencies for your specific camera. 
